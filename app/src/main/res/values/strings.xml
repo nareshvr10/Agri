@@ -1,0 +1,98 @@
+<resources>
+    <string name="app_name">AgroGuard AI</string>
+    <string name="brand_title">AGROGUARD AI</string>
+    <string name="brand_tagline">Smart Farming • Better Tomorrow</string>
+
+    <!-- Navigation & Common -->
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_farms">Farms</string>
+    <string name="nav_sensors">Sensors</string>
+    <string name="nav_scanner">AI Scan</string>
+    <string name="nav_more">More</string>
+    <string name="action_back">Back</string>
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_retry">Retry</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="action_continue">Continue</string>
+    <string name="action_logout">Sign Out</string>
+    <string name="language_english">English</string>
+    <string name="language_tamil">தமிழ் (Tamil)</string>
+    <string name="switch_language">Switch Language</string>
+
+    <!-- Status Badges -->
+    <string name="status_live_esp32">Live ESP32</string>
+    <string name="status_manual_log">Manual Field Log</string>
+    <string name="status_cached_offline">Offline Cached</string>
+    <string name="status_device_not_connected">Device not connected</string>
+    <string name="status_ai_not_configured">AI service not configured</string>
+    <string name="status_weather_unavailable">Weather data unavailable</string>
+    <string name="last_synced_prefix">Last synced: %1$s</string>
+    <string name="offline_banner_message">Offline mode — displaying locally cached data. Writes will sync automatically when connected.</string>
+
+    <!-- Splash, Onboarding & Auth -->
+    <string name="onboarding_title_1">Precision Telemetry for Every Acre</string>
+    <string name="onboarding_desc_1">Monitor Paddy, Banana, and Tomato zones with verified ESP32 soil and environmental sensors.</string>
+    <string name="onboarding_title_2">Preliminary AI Leaf Screening</string>
+    <string name="onboarding_desc_2">Capture crop photos for structured symptom screening and share findings with Agricultural Experts.</string>
+    <string name="onboarding_title_3">Data-Driven Irrigation &amp; Risk Alerts</string>
+    <string name="onboarding_desc_3">Receive threshold-based irrigation guidance and drought, heat, or waterlogging alerts without guesswork.</string>
+    <string name="action_get_started">Get Started</string>
+    <string name="action_skip">Skip</string>
+    <string name="login_title">Sign in to AGROGUARD AI</string>
+    <string name="login_subtitle">Use your verified Google account to access your farms, sensors, and crop diagnostics securely.</string>
+    <string name="sign_in_google">Sign in with Google</string>
+    <string name="auth_no_public_admin">Admin and Expert roles are verified server-side. New accounts register as Farmer.</string>
+    <string name="farmer_reg_title">Complete Farmer Profile</string>
+    <string name="farmer_reg_subtitle">Set up your agricultural profile to create farms and connect ESP32 field nodes.</string>
+    <string name="label_full_name">Full Name</string>
+    <string name="label_district">District / Region</string>
+    <string name="label_phone">Phone (Optional)</string>
+    <string name="label_crops_grown">Primary Crops</string>
+
+    <!-- Crops & Growth Stages -->
+    <string name="crop_paddy">Paddy (Rice)</string>
+    <string name="crop_banana">Banana</string>
+    <string name="crop_tomato">Tomato</string>
+    <string name="stage_seedling">Seedling / Nursery</string>
+    <string name="stage_vegetative">Vegetative</string>
+    <string name="stage_flowering">Flowering / Panicle</string>
+    <string name="stage_fruiting">Fruiting / Grain Fill</string>
+    <string name="stage_harvest">Harvest Ready</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_selected_farm">Selected Farm</string>
+    <string name="dashboard_no_farms_title">No Farms Registered Yet</string>
+    <string name="dashboard_no_farms_desc">Add your first Paddy, Banana, or Tomato farm to begin tracking crop zones and sensors.</string>
+    <string name="dashboard_latest_sensors">Latest Field Telemetry</string>
+    <string name="dashboard_no_sensor_desc">No active ESP32 sensor connected to this zone. Connect a provisioned ESP32 node or record a manual field log.</string>
+    <string name="dashboard_active_alerts">Active Alerts</string>
+    <string name="dashboard_recent_scans">Recent AI Assessments</string>
+    <string name="dashboard_irrigation_status">Irrigation Advisory</string>
+    <string name="dashboard_quick_actions">Quick Actions</string>
+
+    <!-- Screens -->
+    <string name="screen_farm_management">Farm Management</string>
+    <string name="screen_add_farm">Add Farm</string>
+    <string name="screen_crop_selection">Crop Selection Guide</string>
+    <string name="screen_crop_zones">Crop Zones</string>
+    <string name="screen_sensor_monitoring">ESP32 &amp; Sensor Monitoring</string>
+    <string name="screen_sensor_charts">Sensor History Charts</string>
+    <string name="screen_crop_scanner">AI Crop Image Scanner</string>
+    <string name="screen_ai_results">AI Diagnosis Results</string>
+    <string name="screen_irrigation">Irrigation Recommendations</string>
+    <string name="screen_weather_risk">Weather &amp; Environmental Risk</string>
+    <string name="screen_alerts">Farm Alerts</string>
+    <string name="screen_analytics">Farm Analytics</string>
+    <string name="screen_consultation">Expert Consultation</string>
+    <string name="screen_notifications">Notifications</string>
+    <string name="screen_profile">Profile</string>
+    <string name="screen_settings">Settings &amp; Backend</string>
+    <string name="screen_language">Language Selection</string>
+    <string name="screen_admin">Admin Management</string>
+
+    <!-- Disclaimers & Specific Rules -->
+    <string name="ai_preliminary_disclaimer">Preliminary AI screening only. This is not a confirmed agronomic diagnosis and must be reviewed by a qualified Agricultural Expert before applying treatments.</string>
+    <string name="irrigation_no_actuation_note">Advisory only — automatic pump actuation is disabled in this version.</string>
+    <string name="esp32_security_note">Phone clients cannot impersonate verified ESP32 telemetry. Hardware readings require server-side ingestion with per-device credentials.</string>
+</resources>

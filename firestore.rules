@@ -1,0 +1,455 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net (Default Deny)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Hardened Global Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        ('email_verified' in request.auth.token &&
+         request.auth.token.email_verified == true &&
+         'email' in request.auth.token &&
+         request.auth.token.email == 'vrnking.in@gmail.com')
+      );
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function isValidTimestamp(ts) {
+      return ts is timestamp && ts <= request.time;
+    }
+
+    function isValidCrop(crop) {
+      return crop is string && crop in ['PADDY', 'BANANA', 'TOMATO'];
+    }
+
+    function isValidBoundedStringList(lst, maxLen) {
+      return lst is list && lst.size() <= maxLen && (lst.size() == 0 || lst[0] is string);
+    }
+
+    // 3. Entity Validators
+    function isValidUserProfile(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 80 &&
+             (!('email' in data) || (data.email is string && data.email.size() <= 120)) &&
+             data.role is string && data.role in ['FARMER', 'EXPERT', 'ADMIN'] &&
+             (!('district' in data) || (data.district is string && data.district.size() <= 80)) &&
+             (!('phone' in data) || (data.phone is string && data.phone.size() <= 25)) &&
+             data.preferredLanguage is string && data.preferredLanguage in ['en', 'ta'] &&
+             isValidBoundedStringList(data.cropsGrown, 5) &&
+             isValidTimestamp(data.createdAt) &&
+             isValidTimestamp(data.updatedAt);
+    }
+
+    function isValidExpertDirectory(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 80 &&
+             data.specialty is string && data.specialty.size() >= 1 && data.specialty.size() <= 100 &&
+             data.district is string && data.district.size() >= 1 && data.district.size() <= 80 &&
+             data.active is bool &&
+             isValidTimestamp(data.createdAt) &&
+             isValidTimestamp(data.updatedAt);
+    }
+
+    function isValidFarm(data) {
+      return data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 &&
+             data.name is string && data.name.size() >= 2 && data.name.size() <= 80 &&
+             data.locationName is string && data.locationName.size() >= 2 && data.locationName.size() <= 120 &&
+             data.latitude is number && data.latitude >= -90.0 && data.latitude <= 90.0 &&
+             data.longitude is number && data.longitude >= -180.0 && data.longitude <= 180.0 &&
+             data.areaAcres is number && data.areaAcres > 0.0 && data.areaAcres <= 50000.0 &&
+             isValidCrop(data.primaryCrop) &&
+             isValidBoundedStringList(data.sharedExpertIds, 10) &&
+             isValidTimestamp(data.createdAt) &&
+             isValidTimestamp(data.updatedAt);
+    }
+
+    function isValidCropZone(data) {
+      return data.farmId is string && isValidId(data.farmId) &&
+             data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 &&
+             isValidBoundedStringList(data.sharedExpertIds, 10) &&
+             data.name is string && data.name.size() >= 2 && data.name.size() <= 80 &&
+             isValidCrop(data.cropType) &&
+             (!('variety' in data) || (data.variety is string && data.variety.size() <= 80)) &&
+             data.plantingDateEpochMs is int && data.plantingDateEpochMs > 0 &&
+             data.growthStage is string && data.growthStage in ['SEEDLING', 'VEGETATIVE', 'FLOWERING', 'FRUITING_MATURITY', 'HARVEST_READY'] &&
+             data.areaAcres is number && data.areaAcres > 0.0 && data.areaAcres <= 50000.0 &&
+             data.minSoilMoisturePct is number && data.minSoilMoisturePct >= 0.0 && data.minSoilMoisturePct <= 100.0 &&
+             data.maxSoilMoisturePct is number && data.maxSoilMoisturePct >= data.minSoilMoisturePct && data.maxSoilMoisturePct <= 100.0 &&
+             data.maxAirTempC is number && data.maxAirTempC >= 10.0 && data.maxAirTempC <= 60.0 &&
+             isValidTimestamp(data.createdAt) &&
+             isValidTimestamp(data.updatedAt);
+    }
+
+    function isValidEsp32Device(data) {
+      return data.farmId is string && isValidId(data.farmId) &&
+             data.cropZoneId is string && isValidId(data.cropZoneId) &&
+             data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 &&
+             isValidBoundedStringList(data.sharedExpertIds, 10) &&
+             data.label is string && data.label.size() >= 2 && data.label.size() <= 80 &&
+             data.connectionStatus is string && data.connectionStatus in ['UNCONNECTED', 'ONLINE', 'OFFLINE', 'REVOKED'] &&
+             data.lastSeenEpochMs is int && data.lastSeenEpochMs >= 0 &&
+             data.firmwareVersion is string && data.firmwareVersion.size() >= 1 && data.firmwareVersion.size() <= 32 &&
+             data.credentialHint is string && data.credentialHint.size() >= 1 && data.credentialHint.size() <= 40 &&
+             data.revoked is bool &&
+             isValidTimestamp(data.createdAt) &&
+             isValidTimestamp(data.updatedAt);
+    }
+
+    function isValidSensorReading(data) {
+      return data.farmId is string && isValidId(data.farmId) &&
+             data.cropZoneId is string && isValidId(data.cropZoneId) &&
+             data.deviceId is string && data.deviceId.size() >= 1 && data.deviceId.size() <= 128 &&
+             data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 &&
+             isValidBoundedStringList(data.sharedExpertIds, 10) &&
+             data.source is string && data.source in ['ESP32_VERIFIED', 'MANUAL_LOG'] &&
+             data.soilMoisturePct is number && data.soilMoisturePct >= 0.0 && data.soilMoisturePct <= 100.0 &&
+             data.soilTempC is number && data.soilTempC >= -10.0 && data.soilTempC <= 70.0 &&
+             data.airTempC is number && data.airTempC >= -10.0 && data.airTempC <= 65.0 &&
+             data.humidityPct is number && data.humidityPct >= 0.0 && data.humidityPct <= 100.0 &&
+             data.lightLux is number && data.lightLux >= 0.0 && data.lightLux <= 200000.0 &&
+             data.rainfallMm is number && data.rainfallMm >= 0.0 && data.rainfallMm <= 1000.0 &&
+             (!('waterLevelCm' in data) || (data.waterLevelCm is number && data.waterLevelCm >= 0.0 && data.waterLevelCm <= 500.0)) &&
+             data.recordedEpochMs is int && data.recordedEpochMs > 0 &&
+             isValidTimestamp(data.createdAt);
+    }
+
+    function isValidCropScanRecord(data) {
+      return data.farmId is string && isValidId(data.farmId) &&
+             data.cropZoneId is string && isValidId(data.cropZoneId) &&
+             data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 &&
+             isValidBoundedStringList(data.sharedExpertIds, 10) &&
+             isValidCrop(data.cropType) &&
+             data.imageUri is string && data.imageUri.size() <= 500 &&
+             data.identifiedCrop is string && data.identifiedCrop.size() >= 1 && data.identifiedCrop.size() <= 100 &&
+             data.possibleCondition is string && data.possibleCondition.size() >= 1 && data.possibleCondition.size() <= 160 &&
+             isValidBoundedStringList(data.visibleSymptoms, 10) &&
+             data.confidencePct is int && data.confidencePct >= 0 && data.confidencePct <= 100 &&
+             data.severity is string && data.severity in ['LOW', 'MODERATE', 'HIGH', 'CRITICAL', 'UNKNOWN'] &&
+             isValidBoundedStringList(data.recommendedNextSteps, 10) &&
+             data.uncertaintyNotes is string && data.uncertaintyNotes.size() <= 600 &&
+             data.expertConfirmed is bool &&
+             (!('expertNotes' in data) || (data.expertNotes is string && data.expertNotes.size() <= 600)) &&
+             isValidTimestamp(data.createdAt) &&
+             isValidTimestamp(data.updatedAt);
+    }
+
+    function isValidFarmAlert(data) {
+      return data.farmId is string && isValidId(data.farmId) &&
+             data.cropZoneId is string && isValidId(data.cropZoneId) &&
+             data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 &&
+             isValidBoundedStringList(data.sharedExpertIds, 10) &&
+             data.alertType is string && data.alertType in ['SOIL_MOISTURE', 'HIGH_TEMP', 'HEAVY_RAINFALL', 'SENSOR_OFFLINE', 'UNUSUAL_READING', 'CROP_HEALTH', 'IRRIGATION_ADVISORY'] &&
+             data.severity is string && data.severity in ['INFO', 'WARNING', 'CRITICAL'] &&
+             data.title is string && data.title.size() >= 2 && data.title.size() <= 120 &&
+             data.explanation is string && data.explanation.size() >= 2 && data.explanation.size() <= 500 &&
+             data.acknowledged is bool &&
+             isValidTimestamp(data.createdAt) &&
+             isValidTimestamp(data.updatedAt);
+    }
+
+    function isValidConsultationMessage(data) {
+      return data.farmId is string && isValidId(data.farmId) &&
+             data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 &&
+             isValidBoundedStringList(data.sharedExpertIds, 10) &&
+             data.senderId is string && data.senderId.size() >= 1 && data.senderId.size() <= 128 &&
+             data.senderName is string && data.senderName.size() >= 1 && data.senderName.size() <= 80 &&
+             data.senderRole is string && data.senderRole in ['FARMER', 'EXPERT', 'ADMIN'] &&
+             data.messageText is string && data.messageText.size() >= 1 && data.messageText.size() <= 1000 &&
+             (!('scanRefId' in data) || (data.scanRefId is string && data.scanRefId.size() <= 128)) &&
+             isValidTimestamp(data.createdAt);
+    }
+
+    // 4. Collection Rules
+    match /admins/{uid} {
+      allow get: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow list, write: if false;
+    }
+
+    match /users/{userId} {
+      allow get: if isSignedIn() && isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if isAdmin();
+
+      // Prevent self-assigned ADMIN or EXPERT escalation on registration
+      allow create: if isSignedIn() &&
+                       isValidId(userId) &&
+                       isOwner(userId) &&
+                       isValidUserProfile(incoming()) &&
+                       incoming().userId == request.auth.uid &&
+                       (incoming().role == 'FARMER' || (isAdmin() && incoming().role in ['FARMER', 'EXPERT', 'ADMIN'])) &&
+                       incoming().keys().hasAll(['userId', 'displayName', 'role', 'preferredLanguage', 'cropsGrown', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['userId', 'displayName', 'email', 'role', 'district', 'phone', 'preferredLanguage', 'cropsGrown', 'createdAt', 'updatedAt']);
+
+      allow update: if isSignedIn() &&
+                       isValidId(userId) &&
+                       isValidUserProfile(incoming()) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       (
+                         (isOwner(userId) &&
+                          incoming().role == existing().role &&
+                          incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'email', 'district', 'phone', 'preferredLanguage', 'cropsGrown', 'updatedAt'])) ||
+                         (isAdmin() &&
+                          incoming().role in ['FARMER', 'EXPERT'] &&
+                          incoming().diff(existing()).affectedKeys().hasOnly(['role', 'updatedAt']))
+                       );
+
+      allow delete: if isAdmin() && isValidId(userId);
+    }
+
+    match /expert_directory/{expertId} {
+      allow get: if isSignedIn() && isValidId(expertId);
+      allow list: if isSignedIn();
+      allow create, update: if isSignedIn() &&
+                               isValidId(expertId) &&
+                               isAdmin() &&
+                               isValidExpertDirectory(incoming()) &&
+                               incoming().keys().hasAll(['userId', 'displayName', 'specialty', 'district', 'active', 'createdAt', 'updatedAt']) &&
+                               incoming().keys().hasOnly(['userId', 'displayName', 'specialty', 'district', 'active', 'createdAt', 'updatedAt']);
+      allow delete: if isAdmin() && isValidId(expertId);
+    }
+
+    match /farms/{farmId} {
+      allow get: if isSignedIn() && isValidId(farmId) &&
+                    (existing().ownerId == request.auth.uid ||
+                     request.auth.uid in existing().sharedExpertIds ||
+                     isAdmin());
+      allow list: if isSignedIn() &&
+                     (existing().ownerId == request.auth.uid ||
+                      request.auth.uid in existing().sharedExpertIds ||
+                      isAdmin());
+
+      allow create: if isSignedIn() &&
+                       isValidId(farmId) &&
+                       isValidFarm(incoming()) &&
+                       incoming().ownerId == request.auth.uid &&
+                       incoming().keys().hasAll(['ownerId', 'name', 'locationName', 'latitude', 'longitude', 'areaAcres', 'primaryCrop', 'sharedExpertIds', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['ownerId', 'name', 'locationName', 'latitude', 'longitude', 'areaAcres', 'primaryCrop', 'sharedExpertIds', 'createdAt', 'updatedAt']);
+
+      allow update: if isSignedIn() &&
+                       isValidId(farmId) &&
+                       isValidFarm(incoming()) &&
+                       incoming().ownerId == existing().ownerId &&
+                       incoming().createdAt == existing().createdAt &&
+                       (
+                         isAdmin() ||
+                         (existing().ownerId == request.auth.uid &&
+                          incoming().diff(existing()).affectedKeys().hasOnly(['name', 'locationName', 'latitude', 'longitude', 'areaAcres', 'primaryCrop', 'sharedExpertIds', 'updatedAt']))
+                       );
+
+      allow delete: if isSignedIn() && isValidId(farmId) && (existing().ownerId == request.auth.uid || isAdmin());
+    }
+
+    match /crop_zones/{zoneId} {
+      allow get: if isSignedIn() && isValidId(zoneId) &&
+                    (existing().ownerId == request.auth.uid ||
+                     request.auth.uid in existing().sharedExpertIds ||
+                     isAdmin());
+      allow list: if isSignedIn() &&
+                     (existing().ownerId == request.auth.uid ||
+                      request.auth.uid in existing().sharedExpertIds ||
+                      isAdmin());
+
+      allow create: if isSignedIn() &&
+                       isValidId(zoneId) &&
+                       isValidCropZone(incoming()) &&
+                       incoming().ownerId == request.auth.uid &&
+                       incoming().keys().hasAll(['farmId', 'ownerId', 'sharedExpertIds', 'name', 'cropType', 'plantingDateEpochMs', 'growthStage', 'areaAcres', 'minSoilMoisturePct', 'maxSoilMoisturePct', 'maxAirTempC', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['farmId', 'ownerId', 'sharedExpertIds', 'name', 'cropType', 'variety', 'plantingDateEpochMs', 'growthStage', 'areaAcres', 'minSoilMoisturePct', 'maxSoilMoisturePct', 'maxAirTempC', 'createdAt', 'updatedAt']) &&
+                       exists(/databases/$(database)/documents/farms/$(incoming().farmId)) &&
+                       get(/databases/$(database)/documents/farms/$(incoming().farmId)).data.ownerId == request.auth.uid;
+
+      allow update: if isSignedIn() &&
+                       isValidId(zoneId) &&
+                       isValidCropZone(incoming()) &&
+                       incoming().farmId == existing().farmId &&
+                       incoming().ownerId == existing().ownerId &&
+                       incoming().createdAt == existing().createdAt &&
+                       (
+                         isAdmin() ||
+                         (existing().ownerId == request.auth.uid &&
+                          incoming().diff(existing()).affectedKeys().hasOnly(['name', 'cropType', 'variety', 'plantingDateEpochMs', 'growthStage', 'areaAcres', 'minSoilMoisturePct', 'maxSoilMoisturePct', 'maxAirTempC', 'sharedExpertIds', 'updatedAt']))
+                       );
+
+      allow delete: if isSignedIn() && isValidId(zoneId) && (existing().ownerId == request.auth.uid || isAdmin());
+    }
+
+    match /esp32_devices/{deviceId} {
+      allow get: if isSignedIn() && isValidId(deviceId) &&
+                    (existing().ownerId == request.auth.uid ||
+                     request.auth.uid in existing().sharedExpertIds ||
+                     isAdmin());
+      allow list: if isSignedIn() &&
+                     (existing().ownerId == request.auth.uid ||
+                      request.auth.uid in existing().sharedExpertIds ||
+                      isAdmin());
+
+      // Client registration starts UNCONNECTED; trusted ONLINE telemetry transitions happen server-side
+      allow create: if isSignedIn() &&
+                       isValidId(deviceId) &&
+                       isValidEsp32Device(incoming()) &&
+                       incoming().ownerId == request.auth.uid &&
+                       incoming().connectionStatus == 'UNCONNECTED' &&
+                       incoming().revoked == false &&
+                       incoming().keys().hasAll(['farmId', 'cropZoneId', 'ownerId', 'sharedExpertIds', 'label', 'connectionStatus', 'lastSeenEpochMs', 'firmwareVersion', 'credentialHint', 'revoked', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['farmId', 'cropZoneId', 'ownerId', 'sharedExpertIds', 'label', 'connectionStatus', 'lastSeenEpochMs', 'firmwareVersion', 'credentialHint', 'revoked', 'createdAt', 'updatedAt']) &&
+                       exists(/databases/$(database)/documents/farms/$(incoming().farmId)) &&
+                       get(/databases/$(database)/documents/farms/$(incoming().farmId)).data.ownerId == request.auth.uid;
+
+      allow update: if isSignedIn() &&
+                       isValidId(deviceId) &&
+                       isValidEsp32Device(incoming()) &&
+                       incoming().farmId == existing().farmId &&
+                       incoming().ownerId == existing().ownerId &&
+                       incoming().createdAt == existing().createdAt &&
+                       (
+                         isAdmin() ||
+                         (existing().ownerId == request.auth.uid &&
+                          incoming().connectionStatus in ['UNCONNECTED', 'REVOKED'] &&
+                          incoming().diff(existing()).affectedKeys().hasOnly(['label', 'connectionStatus', 'revoked', 'sharedExpertIds', 'updatedAt']))
+                       );
+
+      allow delete: if isSignedIn() && isValidId(deviceId) && (existing().ownerId == request.auth.uid || isAdmin());
+    }
+
+    match /sensor_readings/{readingId} {
+      allow get: if isSignedIn() && isValidId(readingId) &&
+                    (existing().ownerId == request.auth.uid ||
+                     request.auth.uid in existing().sharedExpertIds ||
+                     isAdmin());
+      allow list: if isSignedIn() &&
+                     (existing().ownerId == request.auth.uid ||
+                      request.auth.uid in existing().sharedExpertIds ||
+                      isAdmin());
+
+      // Phone client CANNOT impersonate a trusted ESP32 device (ESP32_VERIFIED is server-side only)
+      allow create: if isSignedIn() &&
+                       isValidId(readingId) &&
+                       isValidSensorReading(incoming()) &&
+                       incoming().ownerId == request.auth.uid &&
+                       incoming().source == 'MANUAL_LOG' &&
+                       incoming().keys().hasAll(['farmId', 'cropZoneId', 'deviceId', 'ownerId', 'sharedExpertIds', 'source', 'soilMoisturePct', 'soilTempC', 'airTempC', 'humidityPct', 'lightLux', 'rainfallMm', 'recordedEpochMs', 'createdAt']) &&
+                       incoming().keys().hasOnly(['farmId', 'cropZoneId', 'deviceId', 'ownerId', 'sharedExpertIds', 'source', 'soilMoisturePct', 'soilTempC', 'airTempC', 'humidityPct', 'lightLux', 'rainfallMm', 'waterLevelCm', 'recordedEpochMs', 'createdAt']) &&
+                       exists(/databases/$(database)/documents/farms/$(incoming().farmId)) &&
+                       get(/databases/$(database)/documents/farms/$(incoming().farmId)).data.ownerId == request.auth.uid;
+
+      allow update: if false;
+      allow delete: if isSignedIn() && isValidId(readingId) && (existing().ownerId == request.auth.uid || isAdmin());
+    }
+
+    match /crop_scans/{scanId} {
+      allow get: if isSignedIn() && isValidId(scanId) &&
+                    (existing().ownerId == request.auth.uid ||
+                     request.auth.uid in existing().sharedExpertIds ||
+                     isAdmin());
+      allow list: if isSignedIn() &&
+                     (existing().ownerId == request.auth.uid ||
+                      request.auth.uid in existing().sharedExpertIds ||
+                      isAdmin());
+
+      allow create: if isSignedIn() &&
+                       isValidId(scanId) &&
+                       isValidCropScanRecord(incoming()) &&
+                       incoming().ownerId == request.auth.uid &&
+                       incoming().expertConfirmed == false &&
+                       incoming().keys().hasAll(['farmId', 'cropZoneId', 'ownerId', 'sharedExpertIds', 'cropType', 'imageUri', 'identifiedCrop', 'possibleCondition', 'visibleSymptoms', 'confidencePct', 'severity', 'recommendedNextSteps', 'uncertaintyNotes', 'expertConfirmed', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['farmId', 'cropZoneId', 'ownerId', 'sharedExpertIds', 'cropType', 'imageUri', 'identifiedCrop', 'possibleCondition', 'visibleSymptoms', 'confidencePct', 'severity', 'recommendedNextSteps', 'uncertaintyNotes', 'expertConfirmed', 'expertNotes', 'createdAt', 'updatedAt']) &&
+                       exists(/databases/$(database)/documents/farms/$(incoming().farmId)) &&
+                       get(/databases/$(database)/documents/farms/$(incoming().farmId)).data.ownerId == request.auth.uid;
+
+      allow update: if isSignedIn() &&
+                       isValidId(scanId) &&
+                       isValidCropScanRecord(incoming()) &&
+                       incoming().farmId == existing().farmId &&
+                       incoming().ownerId == existing().ownerId &&
+                       incoming().createdAt == existing().createdAt &&
+                       (
+                         isAdmin() ||
+                         (request.auth.uid in existing().sharedExpertIds &&
+                          incoming().diff(existing()).affectedKeys().hasOnly(['expertConfirmed', 'expertNotes', 'updatedAt']))
+                       );
+
+      allow delete: if isSignedIn() && isValidId(scanId) && (existing().ownerId == request.auth.uid || isAdmin());
+    }
+
+    match /alerts/{alertId} {
+      allow get: if isSignedIn() && isValidId(alertId) &&
+                    (existing().ownerId == request.auth.uid ||
+                     request.auth.uid in existing().sharedExpertIds ||
+                     isAdmin());
+      allow list: if isSignedIn() &&
+                     (existing().ownerId == request.auth.uid ||
+                      request.auth.uid in existing().sharedExpertIds ||
+                      isAdmin());
+
+      allow create: if isSignedIn() &&
+                       isValidId(alertId) &&
+                       isValidFarmAlert(incoming()) &&
+                       incoming().ownerId == request.auth.uid &&
+                       incoming().keys().hasAll(['farmId', 'cropZoneId', 'ownerId', 'sharedExpertIds', 'alertType', 'severity', 'title', 'explanation', 'acknowledged', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['farmId', 'cropZoneId', 'ownerId', 'sharedExpertIds', 'alertType', 'severity', 'title', 'explanation', 'acknowledged', 'createdAt', 'updatedAt']) &&
+                       exists(/databases/$(database)/documents/farms/$(incoming().farmId)) &&
+                       get(/databases/$(database)/documents/farms/$(incoming().farmId)).data.ownerId == request.auth.uid;
+
+      allow update: if isSignedIn() &&
+                       isValidId(alertId) &&
+                       isValidFarmAlert(incoming()) &&
+                       incoming().farmId == existing().farmId &&
+                       incoming().ownerId == existing().ownerId &&
+                       incoming().createdAt == existing().createdAt &&
+                       (
+                         isAdmin() ||
+                         ((existing().ownerId == request.auth.uid || request.auth.uid in existing().sharedExpertIds) &&
+                          incoming().diff(existing()).affectedKeys().hasOnly(['acknowledged', 'updatedAt']))
+                       );
+
+      allow delete: if isSignedIn() && isValidId(alertId) && (existing().ownerId == request.auth.uid || isAdmin());
+    }
+
+    match /consultations/{messageId} {
+      allow get: if isSignedIn() && isValidId(messageId) &&
+                    (existing().ownerId == request.auth.uid ||
+                     request.auth.uid in existing().sharedExpertIds ||
+                     isAdmin());
+      allow list: if isSignedIn() &&
+                     (existing().ownerId == request.auth.uid ||
+                      request.auth.uid in existing().sharedExpertIds ||
+                      isAdmin());
+
+      allow create: if isSignedIn() &&
+                       isValidId(messageId) &&
+                       isValidConsultationMessage(incoming()) &&
+                       incoming().senderId == request.auth.uid &&
+                       incoming().keys().hasAll(['farmId', 'ownerId', 'sharedExpertIds', 'senderId', 'senderName', 'senderRole', 'messageText', 'createdAt']) &&
+                       incoming().keys().hasOnly(['farmId', 'ownerId', 'sharedExpertIds', 'senderId', 'senderName', 'senderRole', 'messageText', 'scanRefId', 'createdAt']) &&
+                       exists(/databases/$(database)/documents/farms/$(incoming().farmId)) &&
+                       (get(/databases/$(database)/documents/farms/$(incoming().farmId)).data.ownerId == request.auth.uid ||
+                        request.auth.uid in get(/databases/$(database)/documents/farms/$(incoming().farmId)).data.sharedExpertIds ||
+                        isAdmin());
+
+      allow update, delete: if false;
+    }
+  }
+}

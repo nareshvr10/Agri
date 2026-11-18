@@ -1,0 +1,98 @@
+<resources>
+    <string name="app_name">அக்ரோகார்ட் AI</string>
+    <string name="brand_title">AGROGUARD AI</string>
+    <string name="brand_tagline">ஸ்மார்ட் விவசாயம் • சிறந்த நாளை</string>
+
+    <!-- Navigation & Common -->
+    <string name="nav_dashboard">முகப்பு</string>
+    <string name="nav_farms">பண்ணைகள்</string>
+    <string name="nav_sensors">சென்சார்கள்</string>
+    <string name="nav_scanner">AI ஸ்கேன்</string>
+    <string name="nav_more">மேலும்</string>
+    <string name="action_back">பின்செல்</string>
+    <string name="action_save">சேமி</string>
+    <string name="action_cancel">ரத்து செய்</string>
+    <string name="action_retry">மீண்டும் முயற்சி</string>
+    <string name="action_refresh">புதுப்பி</string>
+    <string name="action_continue">தொடர்க</string>
+    <string name="action_logout">வெளியேறு</string>
+    <string name="language_english">English</string>
+    <string name="language_tamil">தமிழ் (Tamil)</string>
+    <string name="switch_language">மொழி மாற்று</string>
+
+    <!-- Status Badges -->
+    <string name="status_live_esp32">நேரடி ESP32</string>
+    <string name="status_manual_log">கைமுறை பதிவு</string>
+    <string name="status_cached_offline">ஆஃப்லைன் சேமிப்பு</string>
+    <string name="status_device_not_connected">சாதனம் இணைக்கப்படவில்லை</string>
+    <string name="status_ai_not_configured">AI சேவை கட்டமைக்கப்படவில்லை</string>
+    <string name="status_weather_unavailable">வானிலை தகவல் கிடைக்கவில்லை</string>
+    <string name="last_synced_prefix">கடைசி ஒத்திசைவு: %1$s</string>
+    <string name="offline_banner_message">ஆஃப்லைன் நிலை — உள்ளூர் சேமிப்புத் தரவு காட்டப்படுகிறது. இணையம் இணைந்தவுடன் மாற்றங்கள் ஒத்திசைக்கப்படும்.</string>
+
+    <!-- Splash, Onboarding & Auth -->
+    <string name="onboarding_title_1">ஒவ்வொரு ஏக்கருக்கும் துல்லியமான கண்காணிப்பு</string>
+    <string name="onboarding_desc_1">நெல், வாழை மற்றும் தக்காளி பயிர்களை ESP32 மண் மற்றும் சுற்றுச்சூழல் சென்சார்கள் மூலம் கண்காணிக்கவும்.</string>
+    <string name="onboarding_title_2">முதற்கட்ட AI இலை ஆய்வு</string>
+    <string name="onboarding_desc_2">பயிர் இலை புகைப்படங்களை எடுத்து அறிகுறிகளை ஆய்வு செய்து வேளாண் நிபுணர்களுடன் பகிரவும்.</string>
+    <string name="onboarding_title_3">தரவு அடிப்படையிலான நீர்ப்பாசன ஆலோசனை</string>
+    <string name="onboarding_desc_3">வறட்சி, வெப்பம் மற்றும் அதிக மழை எச்சரிக்கைகளுடன் துல்லியமான நீர்ப்பாசன வழிகாட்டுதலைப் பெறுங்கள்.</string>
+    <string name="action_get_started">தொடங்குங்கள்</string>
+    <string name="action_skip">தவிர்</string>
+    <string name="login_title">AGROGUARD AI-இல் உள்நுழையவும்</string>
+    <string name="login_subtitle">உங்கள் பண்ணைகள், சென்சார்கள் மற்றும் பயிர் ஆய்வுகளை பாதுகாப்பாக அணுக Google கணக்கில் உள்நுழையவும்.</string>
+    <string name="sign_in_google">Google மூலம் உள்நுழையவும்</string>
+    <string name="auth_no_public_admin">நிர்வாகி மற்றும் நிபுணர் பொறுப்புகள் சேவையகத்தால் சரிபார்க்கப்படும். புதிய பயனர்கள் விவசாயியாகப் பதிவு செய்யப்படுவர்.</string>
+    <string name="farmer_reg_title">விவசாயி சுயவிவரத்தை நிறைவு செய்யவும்</string>
+    <string name="farmer_reg_subtitle">பண்ணைகளை உருவாக்கவும் ESP32 சென்சார்களை இணைக்கவும் உங்கள் விவரங்களை உள்ளிடவும்.</string>
+    <string name="label_full_name">முழு பெயர்</string>
+    <string name="label_district">மாவட்டம் / பகுதி</string>
+    <string name="label_phone">தொலைபேசி (விருப்பம்)</string>
+    <string name="label_crops_grown">முதன்மைப் பயிர்கள்</string>
+
+    <!-- Crops & Growth Stages -->
+    <string name="crop_paddy">நெல்</string>
+    <string name="crop_banana">வாழை</string>
+    <string name="crop_tomato">தக்காளி</string>
+    <string name="stage_seedling">நாற்றுப் பருவம்</string>
+    <string name="stage_vegetative">வளர்ச்சிப் பருவம்</string>
+    <string name="stage_flowering">பூக்கும் பருவம்</string>
+    <string name="stage_fruiting">காய் / கதிர் பிடிப்பு</string>
+    <string name="stage_harvest">அறுவடைக்குத் தயார்</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_selected_farm">தேர்ந்தெடுக்கப்பட்ட பண்ணை</string>
+    <string name="dashboard_no_farms_title">பண்ணைகள் எதுவும் பதிவு செய்யப்படவில்லை</string>
+    <string name="dashboard_no_farms_desc">பயிர் மண்டலங்கள் மற்றும் சென்சார்களை கண்காணிக்க உங்கள் முதல் நெல், வாழை அல்லது தக்காளி பண்ணையைச் சேர்க்கவும்.</string>
+    <string name="dashboard_latest_sensors">சமீபத்திய சென்சார் அளவுகள்</string>
+    <string name="dashboard_no_sensor_desc">இந்த மண்டலத்தில் ESP32 சென்சார் இணைக்கப்படவில்லை. சாதனத்தை இணைக்கவும் அல்லது கைமுறை அளவைப் பதிவு செய்யவும்.</string>
+    <string name="dashboard_active_alerts">செயலில் உள்ள எச்சரிக்கைகள்</string>
+    <string name="dashboard_recent_scans">சமீபத்திய AI ஆய்வுகள்</string>
+    <string name="dashboard_irrigation_status">நீர்ப்பாசன ஆலோசனை</string>
+    <string name="dashboard_quick_actions">விரைவுச் செயல்கள்</string>
+
+    <!-- Screens -->
+    <string name="screen_farm_management">பண்ணை மேலாண்மை</string>
+    <string name="screen_add_farm">புதிய பண்ணை சேர்க்க</string>
+    <string name="screen_crop_selection">பயிர் தேர்வு வழிகாட்டி</string>
+    <string name="screen_crop_zones">பயிர் மண்டலங்கள்</string>
+    <string name="screen_sensor_monitoring">ESP32 மற்றும் சென்சார் கண்காணிப்பு</string>
+    <string name="screen_sensor_charts">சென்சார் வரலாற்று வரைபடம்</string>
+    <string name="screen_crop_scanner">AI பயிர் இலை ஸ்கேனர்</string>
+    <string name="screen_ai_results">AI ஆய்வு முடிவுகள்</string>
+    <string name="screen_irrigation">நீர்ப்பாசன பரிந்துரைகள்</string>
+    <string name="screen_weather_risk">வானிலை மற்றும் சுற்றுச்சூழல் ஆபத்து</string>
+    <string name="screen_alerts">பண்ணை எச்சரிக்கைகள்</string>
+    <string name="screen_analytics">பண்ணை பகுப்பாய்வு</string>
+    <string name="screen_consultation">வேளாண் நிபுணர் ஆலோசனை</string>
+    <string name="screen_notifications">அறிவிப்புகள்</string>
+    <string name="screen_profile">சுயவிவரம்</string>
+    <string name="screen_settings">அமைப்புகள் மற்றும் சேவையகம்</string>
+    <string name="screen_language">மொழி தேர்வு</string>
+    <string name="screen_admin">நிர்வாக மேலாண்மை</string>
+
+    <!-- Disclaimers & Specific Rules -->
+    <string name="ai_preliminary_disclaimer">இது முதற்கட்ட AI ஆய்வு மட்டுமே. இது உறுதியான நோயறிதல் அல்ல; சிகிச்சை அளிக்கும் முன் வேளாண் நிபுணரிடம் உறுதிப்படுத்தவும்.</string>
+    <string name="irrigation_no_actuation_note">வழிகாட்டுதல் மட்டுமே — இந்த பதிப்பில் தானியங்கி பம்ப் இயக்கம் முடக்கப்பட்டுள்ளது.</string>
+    <string name="esp32_security_note">கைபேசி செயலி நேரடியாக ESP32 தரவை உருவாக்க முடியாது. சாதனத் தரவு சேவையகச் சான்றுகள் வழியாக மட்டுமே ஏற்கப்படும்.</string>
+</resources>

@@ -1,0 +1,6 @@
+{
+  "name": "AgroGuard AI",
+  "description": "Smart farming platform for Paddy, Banana, and Tomato with ESP32 telemetry, AI crop disease screening, irrigation advisories, and weather risk alerts.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

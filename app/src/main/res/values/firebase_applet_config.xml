@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+    <string name="firestore_database_id" translatable="false">ai-studio-android-agroguar-d3d2d0f8-9a82-48d0-a4c5-152a79297ffb</string>
+    <string name="recaptcha_site_key" translatable="false">6Ldu-CYuAAAAAD9ZP9QqNidvurWJjR0vpPOI7vIr</string>
+</resources>

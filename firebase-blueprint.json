@@ -1,0 +1,219 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Authenticated user profile with server-enforced role and language preferences.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Firebase Auth UID" },
+        "displayName": { "type": "string", "description": "User full name" },
+        "email": { "type": "string", "description": "Verified email address" },
+        "role": { "type": "string", "enum": ["FARMER", "EXPERT", "ADMIN"], "description": "Access role" },
+        "district": { "type": "string", "description": "Agricultural district or region" },
+        "phone": { "type": "string", "description": "Contact phone number" },
+        "preferredLanguage": { "type": "string", "enum": ["en", "ta"], "description": "UI language code" },
+        "cropsGrown": { "type": "array", "description": "Cultivated crops" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp on create" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp on update" }
+      },
+      "required": ["userId", "displayName", "role", "preferredLanguage", "cropsGrown", "createdAt", "updatedAt"]
+    },
+    "ExpertDirectoryEntry": {
+      "title": "ExpertDirectoryEntry",
+      "description": "Public directory card for verified Agricultural Experts without PII.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "displayName": { "type": "string" },
+        "specialty": { "type": "string" },
+        "district": { "type": "string" },
+        "active": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "displayName", "specialty", "district", "active", "createdAt", "updatedAt"]
+    },
+    "Farm": {
+      "title": "Farm",
+      "description": "Registered agricultural farm owned by a farmer and optionally shared with experts.",
+      "type": "object",
+      "properties": {
+        "ownerId": { "type": "string" },
+        "name": { "type": "string" },
+        "locationName": { "type": "string" },
+        "latitude": { "type": "number" },
+        "longitude": { "type": "number" },
+        "areaAcres": { "type": "number" },
+        "primaryCrop": { "type": "string", "enum": ["PADDY", "BANANA", "TOMATO"] },
+        "sharedExpertIds": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["ownerId", "name", "locationName", "latitude", "longitude", "areaAcres", "primaryCrop", "sharedExpertIds", "createdAt", "updatedAt"]
+    },
+    "CropZone": {
+      "title": "CropZone",
+      "description": "Field zone within a farm with crop details and irrigation thresholds.",
+      "type": "object",
+      "properties": {
+        "farmId": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "sharedExpertIds": { "type": "array" },
+        "name": { "type": "string" },
+        "cropType": { "type": "string", "enum": ["PADDY", "BANANA", "TOMATO"] },
+        "variety": { "type": "string" },
+        "plantingDateEpochMs": { "type": "integer" },
+        "growthStage": { "type": "string", "enum": ["SEEDLING", "VEGETATIVE", "FLOWERING", "FRUITING_MATURITY", "HARVEST_READY"] },
+        "areaAcres": { "type": "number" },
+        "minSoilMoisturePct": { "type": "number" },
+        "maxSoilMoisturePct": { "type": "number" },
+        "maxAirTempC": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["farmId", "ownerId", "sharedExpertIds", "name", "cropType", "plantingDateEpochMs", "growthStage", "areaAcres", "minSoilMoisturePct", "maxSoilMoisturePct", "maxAirTempC", "createdAt", "updatedAt"]
+    },
+    "Esp32Device": {
+      "title": "Esp32Device",
+      "description": "ESP32 hardware telemetry node bound to a farm and crop zone.",
+      "type": "object",
+      "properties": {
+        "farmId": { "type": "string" },
+        "cropZoneId": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "sharedExpertIds": { "type": "array" },
+        "label": { "type": "string" },
+        "connectionStatus": { "type": "string", "enum": ["UNCONNECTED", "ONLINE", "OFFLINE", "REVOKED"] },
+        "lastSeenEpochMs": { "type": "integer" },
+        "firmwareVersion": { "type": "string" },
+        "credentialHint": { "type": "string" },
+        "revoked": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["farmId", "cropZoneId", "ownerId", "sharedExpertIds", "label", "connectionStatus", "lastSeenEpochMs", "firmwareVersion", "credentialHint", "revoked", "createdAt", "updatedAt"]
+    },
+    "SensorReading": {
+      "title": "SensorReading",
+      "description": "Validated soil and environmental telemetry reading.",
+      "type": "object",
+      "properties": {
+        "farmId": { "type": "string" },
+        "cropZoneId": { "type": "string" },
+        "deviceId": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "sharedExpertIds": { "type": "array" },
+        "source": { "type": "string", "enum": ["ESP32_VERIFIED", "MANUAL_LOG"] },
+        "soilMoisturePct": { "type": "number" },
+        "soilTempC": { "type": "number" },
+        "airTempC": { "type": "number" },
+        "humidityPct": { "type": "number" },
+        "lightLux": { "type": "number" },
+        "rainfallMm": { "type": "number" },
+        "waterLevelCm": { "type": "number" },
+        "recordedEpochMs": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["farmId", "cropZoneId", "deviceId", "ownerId", "sharedExpertIds", "source", "soilMoisturePct", "soilTempC", "airTempC", "humidityPct", "lightLux", "rainfallMm", "recordedEpochMs", "createdAt"]
+    },
+    "CropScanRecord": {
+      "title": "CropScanRecord",
+      "description": "AI crop disease preliminary scan and expert verification notes.",
+      "type": "object",
+      "properties": {
+        "farmId": { "type": "string" },
+        "cropZoneId": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "sharedExpertIds": { "type": "array" },
+        "cropType": { "type": "string", "enum": ["PADDY", "BANANA", "TOMATO"] },
+        "imageUri": { "type": "string" },
+        "identifiedCrop": { "type": "string" },
+        "possibleCondition": { "type": "string" },
+        "visibleSymptoms": { "type": "array" },
+        "confidencePct": { "type": "integer" },
+        "severity": { "type": "string", "enum": ["LOW", "MODERATE", "HIGH", "CRITICAL", "UNKNOWN"] },
+        "recommendedNextSteps": { "type": "array" },
+        "uncertaintyNotes": { "type": "string" },
+        "expertConfirmed": { "type": "boolean" },
+        "expertNotes": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["farmId", "cropZoneId", "ownerId", "sharedExpertIds", "cropType", "imageUri", "identifiedCrop", "possibleCondition", "visibleSymptoms", "confidencePct", "severity", "recommendedNextSteps", "uncertaintyNotes", "expertConfirmed", "createdAt", "updatedAt"]
+    },
+    "FarmAlert": {
+      "title": "FarmAlert",
+      "description": "Threshold, sensor offline, weather, or crop health alert.",
+      "type": "object",
+      "properties": {
+        "farmId": { "type": "string" },
+        "cropZoneId": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "sharedExpertIds": { "type": "array" },
+        "alertType": { "type": "string", "enum": ["SOIL_MOISTURE", "HIGH_TEMP", "HEAVY_RAINFALL", "SENSOR_OFFLINE", "UNUSUAL_READING", "CROP_HEALTH", "IRRIGATION_ADVISORY"] },
+        "severity": { "type": "string", "enum": ["INFO", "WARNING", "CRITICAL"] },
+        "title": { "type": "string" },
+        "explanation": { "type": "string" },
+        "acknowledged": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["farmId", "cropZoneId", "ownerId", "sharedExpertIds", "alertType", "severity", "title", "explanation", "acknowledged", "createdAt", "updatedAt"]
+    },
+    "ConsultationMessage": {
+      "title": "ConsultationMessage",
+      "description": "Farmer and Agricultural Expert consultation message scoped to a farm.",
+      "type": "object",
+      "properties": {
+        "farmId": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "sharedExpertIds": { "type": "array" },
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string" },
+        "senderRole": { "type": "string", "enum": ["FARMER", "EXPERT", "ADMIN"] },
+        "messageText": { "type": "string" },
+        "scanRefId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["farmId", "ownerId", "sharedExpertIds", "senderId", "senderName", "senderRole", "messageText", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Private user profiles and role records."
+    },
+    "/expert_directory/{expertId}": {
+      "schema": { "$ref": "#/entities/ExpertDirectoryEntry" },
+      "description": "Public directory of verified Agricultural Experts."
+    },
+    "/farms/{farmId}": {
+      "schema": { "$ref": "#/entities/Farm" },
+      "description": "Farmer-owned farms and shared expert access lists."
+    },
+    "/crop_zones/{zoneId}": {
+      "schema": { "$ref": "#/entities/CropZone" },
+      "description": "Crop zones for Paddy, Banana, and Tomato."
+    },
+    "/esp32_devices/{deviceId}": {
+      "schema": { "$ref": "#/entities/Esp32Device" },
+      "description": "Registered ESP32 telemetry nodes."
+    },
+    "/sensor_readings/{readingId}": {
+      "schema": { "$ref": "#/entities/SensorReading" },
+      "description": "Sensor telemetry and manual field logs."
+    },
+    "/crop_scans/{scanId}": {
+      "schema": { "$ref": "#/entities/CropScanRecord" },
+      "description": "AI preliminary crop scan results."
+    },
+    "/alerts/{alertId}": {
+      "schema": { "$ref": "#/entities/FarmAlert" },
+      "description": "Farm and zone alerts."
+    },
+    "/consultations/{messageId}": {
+      "schema": { "$ref": "#/entities/ConsultationMessage" },
+      "description": "Farmer-Expert consultation threads."
+    }
+  }
+}
